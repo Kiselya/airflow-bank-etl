@@ -1,0 +1,13 @@
+{"timestamp":"2025-07-11T22:16:31.518741","level":"info","event":"DAG bundles loaded: dags-folder, example_dags","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager"}
+{"timestamp":"2025-07-11T22:16:31.519144","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/bank_etl_dag.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2025-07-11T22:16:31.545311Z","level":"info","event":"Task instance is in running state","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-11T22:16:31.545451Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.QUEUED","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-11T22:16:31.545540Z","level":"info","event":"Current task name:start_log","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-11T22:16:31.545623Z","level":"info","event":"Dag name:bank_data_etl_process","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-11T22:16:31.548996","level":"info","event":"Connection Retrieved 'postgres_bank_logs'","logger":"airflow.hooks.base"}
+{"timestamp":"2025-07-11T22:16:31.572626","level":"info","event":"Процесс 'Airflow_Full_ETL' запущен. ID лога: 7","logger":"root"}
+{"timestamp":"2025-07-11T22:16:31.572940","level":"info","event":"Done. Returned value was: 7","logger":"airflow.task.operators.airflow.providers.standard.decorators.python._PythonDecoratedOperator"}
+{"timestamp":"2025-07-11T22:16:31.573609","level":"info","event":"Pushing xcom","ti":"RuntimeTaskInstance(id=UUID('0197fb8f-bbf6-7a10-b877-f4c4dc417e73'), task_id='start_log', dag_id='bank_data_etl_process', run_id='manual__2025-07-11T22:16:30.432680+00:00', try_number=1, map_index=-1, hostname='1c5147aba516', context_carrier={}, task=<Task(_PythonDecoratedOperator): start_log>, bundle_instance=LocalDagBundle(name=dags-folder), max_tries=0, start_date=datetime.datetime(2025, 7, 11, 22, 16, 31, 235452, tzinfo=TzInfo(UTC)), end_date=None, state=<TaskInstanceState.RUNNING: 'running'>, is_mapped=False, rendered_map_index=None)","logger":"task"}
+{"timestamp":"2025-07-11T22:16:31.598998Z","level":"info","event":"Task instance in success state","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-11T22:16:31.602047Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.RUNNING","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-11T22:16:31.602149Z","level":"info","event":"Task operator:<Task(_PythonDecoratedOperator): start_log>","chan":"stdout","logger":"task"}

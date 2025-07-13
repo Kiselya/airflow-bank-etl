@@ -1,0 +1,12 @@
+{"timestamp":"2025-07-13T18:26:31.113409","level":"info","event":"DAG bundles loaded: dags-folder, example_dags","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager"}
+{"timestamp":"2025-07-13T18:26:31.113850","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/bank_etl_dag.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2025-07-13T18:26:31.340851Z","level":"info","event":"Task instance is in running state","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-13T18:26:31.341047Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.QUEUED","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-13T18:26:31.341164Z","level":"info","event":"Current task name:finish_log","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-13T18:26:31.341273Z","level":"info","event":"Dag name:bank_data_etl_process","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-13T18:26:31.354803","level":"info","event":"Connection Retrieved 'postgres_bank_logs'","logger":"airflow.hooks.base"}
+{"timestamp":"2025-07-13T18:26:31.377488","level":"info","event":"Process with log ID 17 completed successfully.","logger":"root"}
+{"timestamp":"2025-07-13T18:26:31.377615","level":"info","event":"Done. Returned value was: None","logger":"airflow.task.operators.airflow.providers.standard.decorators.python._PythonDecoratedOperator"}
+{"timestamp":"2025-07-13T18:26:31.395753Z","level":"info","event":"Task instance in success state","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-13T18:26:31.395921Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.RUNNING","chan":"stdout","logger":"task"}
+{"timestamp":"2025-07-13T18:26:31.396022Z","level":"info","event":"Task operator:<Task(_PythonDecoratedOperator): finish_log>","chan":"stdout","logger":"task"}
