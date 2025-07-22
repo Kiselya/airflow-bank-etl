@@ -1,0 +1,158 @@
+
+
+ЗАДАНИЕ 1.1
+
+Порядок выполнения:
+1. Запускаем скрипт 00_create_logs_infrastructure.sql
+Что делает: Создает схему LOGS и таблицу ETL_LOGS, куда будет записываться информация о ходе выполнения ETL-процесса. 
+
+2. Запускаем скрипт 01_Dostup.sql
+Что делает: Создает пользователей, выдаем им права.
+
+3. Запускаем скрипт 02_create_ds_tables.sql
+Что делает: Создает все пустые таблицы в схеме DS (Data Storage), такие как MD_ACCOUNT_D, FT_BALANCE_F другие. 
+Это те таблицы, куда ETL-процесс из Airflow будет загружать данные из CSV-файлов.
+
+4. Для проверки таблицы логов в PostgreSQL:
+SELECT * FROM "LOGS"."ETL_LOGS" ORDER BY log_id DESC LIMIT 1;
+Мы должны были увидеть строку со status: SUCCESS и заполненными end_time и rows_processed
+
+5. Для проверки наличия данных в целевых таблицах DS:
+
+-- Проверяем, что в таблице балансов есть строки
+SELECT COUNT(*) FROM "DS"."FT_BALANCE_F";
+
+-- Проверяем, что в таблице проводок есть строки
+SELECT COUNT(*) FROM "DS"."FT_POSTING_F";
+
+-- Можно посмотреть и на сами данные (пример для одной из таблиц)
+SELECT * FROM "DS"."MD_ACCOUNT_D" LIMIT 30;
+
+Каждый COUNT(*) должен был вернуть число больше нуля, что подтверждает успешную загрузку данных.
+
+
+
+ЗАДАНИЕ 1.2
+
+Предварительное условие: 
+Задание 1.1 должно быть успешно выполнено, т.е. все таблицы в схеме DS должны быть наполнены данными из CSV-файлов.
+
+Порядок выполнения:
+1. Запускаем скрипт 03_create_dm_tables.sql
+Что делает: Создает пустые таблицы DM_ACCOUNT_TURNOVER_F и DM_ACCOUNT_BALANCE_F в схеме DM. 
+Эти таблицы будут содержать агрегированные данные.
+
+2. Запускаем скрипт 04_create_f101_round_f_table.sql
+Что делает: Создает пустую таблицу DM_F101_ROUND_F в схеме DM.
+Хотя эта таблица используется в задании 1.3, её создание на этом этапе является частью общей подготовки структуры слоя DM
+
+3. ВЫПОЛНЯЕМ ЗАПУСК НАШЕГО ДАГА
+
+4. Запускаем скрипт 05_fill_account_turnover_f.sql
+Что делает: Создает хранимую процедуру fill_account_turnover_f, которая будет рассчитывать и наполнять таблицу DM_ACCOUNT_TURNOVER_F
+
+5. Запускаем скрипт 06_fill_account_balance_f.sql
+Что делает: Создает хранимую процедуру fill_account_balance_f, которая будет рассчитывать и наполнять таблицу DM_ACCOUNT_BALANCE_F.
+
+
+6. Для проверки наличия данных в таблицах DM:
+Запуск расчетов витрин данных:
+-- Пример вызова для января 2018 года.
+CALL "DS".fill_account_turnover_f('2018-01-01');
+CALL "DS".fill_account_balance_f('2018-01-01');
+
+
+
+Самое главное - убедиться, что данные появились в целевых таблицах DM.
+Но перед этим смотрим логи))
+SELECT * FROM "LOGS"."ETL_LOGS" WHERE process_name IN ('fill_account_turnover_f', 'fill_account_balance_f') ORDER BY start_time DESC;
+
+-- Проверить количество строк в таблице оборотов
+SELECT COUNT(*) FROM "DM"."DM_ACCOUNT_TURNOVER_F";
+
+-- Проверить количество строк в таблице балансов
+SELECT COUNT(*) FROM "DM"."DM_ACCOUNT_BALANCE_F";
+
+-- Посмотреть часть данных из таблицы оборотов (например, за конкретную дату)
+SELECT * FROM "DM"."DM_ACCOUNT_TURNOVER_F" WHERE on_date = '2018-01-01' LIMIT 10;
+
+-- Посмотреть часть данных из таблицы балансов (например, за конкретную дату)
+SELECT * FROM "DM"."DM_ACCOUNT_BALANCE_F" WHERE on_date = '2018-01-01' LIMIT 10;
+
+
+ЗАДАНИЕ 1.3
+Предварительное условие:
+Задание 1.2 должно быть успешно выполнено, т.е. таблицы DM_ACCOUNT_TURNOVER_F и DM_ACCOUNT_BALANCE_F должны быть наполнены данными.
+
+1. Запускаем скрипт 07_fill_f101_round.sql
+Что делает: Создает хранимую процедуру fill_f101_round, которая будет рассчитывать и наполнять таблицу DM_F101_ROUND_F.
+
+2. Запускаем скрипт 08_run_dm_calculations.sql
+Что делает: Создает наши процедуры для подсчета 
+
+3. Запускаем скрипт 09_run_f101_calculations.sql
+Что делает: Создает наши процедуры для подсчета 
+
+Проверяем результаты расчетов:
+
+SELECT * FROM "DM"."DM_F101_ROUND_F";
+Должна появиться огромная таблица с данными, которая содержит результаты расчетов F101.
+
+
+ЗАДАНИЕ 1.4 
+Предварительное условие: Задания 1.1, 1.2, 1.3 выполнены, таблица DM_F101_ROUND_F заполнена данными.
+
+1. Создаем Python скрипты в папке py_scripts/
+export_import_f101.py - основной скрипт для экспорта/импорта
+import_csv_to_f101_v2.py - упрощенный скрипт только для импорта
+
+2. Запускаем скрипт 10_create_f101_v2_table.sql
+Что делает: Создает копию таблицы DM_F101_ROUND_F_V2 для импорта измененных данных.
+
+3. Запускаем основной скрипт
+
+docker-compose exec airflow-worker python3 /opt/airflow/py_scripts/export_import_f101.py
+
+Что делает:
+Экспортирует данные из DM_F101_ROUND_F в CSV файл
+Изменяет несколько значений в CSV (увеличивает balance_out_rub на 10%)
+Создает таблицу DM_F101_ROUND_F_V2 (если не создана)
+Импортирует измененные данные в новую таблицу
+
+
+4. Проверяем созданные файлы:
+# Список созданных CSV файлов
+docker-compose exec airflow-worker ls -la /opt/airflow/f101_export/
+
+# Содержимое оригинального файла
+docker-compose exec airflow-worker head -5 /opt/airflow/f101_export/f101_report.csv
+
+# Содержимое измененного файла  
+docker-compose exec airflow-worker head -5 /opt/airflow/f101_export/f101_report_modified.csv
+
+5. Проверяем данные в БД 
+
+-- Количество записей в оригинальной таблице
+SELECT COUNT(*) FROM "DM"."DM_F101_ROUND_F";
+
+-- Количество записей в новой таблице
+SELECT COUNT(*) FROM "DM"."DM_F101_ROUND_F_V2";
+
+-- Сравниваем измененные данные
+SELECT 
+    f1.ledger_account,
+    f1.balance_out_rub as original_balance,
+    f2.balance_out_rub as modified_balance,
+    ROUND((f2.balance_out_rub - f1.balance_out_rub), 2) as difference
+FROM "DM"."DM_F101_ROUND_F" f1
+JOIN "DM"."DM_F101_ROUND_F_V2" f2 ON f1.ledger_account = f2.ledger_account
+WHERE f1.balance_out_rub != f2.balance_out_rub;
+
+-- Просмотр данных из новой таблицы
+SELECT * FROM "DM"."DM_F101_ROUND_F_V2" ORDER BY ledger_account;
+
+Ожидаемый результат:
+Экспорт: 18 строк из DM_F101_ROUND_F экспортированы в CSV
+Модификация: Создан modified.csv с измененными значениями balance_out_rub
+Импорт: 18 строк импортированы в DM_F101_ROUND_F_V2
+Файлы: В папке /opt/airflow/f101_export/ созданы f101_report.csv и f101_report_modified.csv
