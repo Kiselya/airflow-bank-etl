@@ -5,11 +5,19 @@ AS $$
 DECLARE
     report_start_date DATE;
     report_end_date DATE;
+    log_message TEXT;
+    rows_inserted INT;
 BEGIN
     -- Определяем начало и конец отчетного месяца на основе входной даты
     -- (i_OnDate - это первый день месяца, СЛЕДУЮЩЕГО за отчетным)
     report_start_date := date_trunc('month', i_OnDate - INTERVAL '1 month');
     report_end_date := date_trunc('month', i_OnDate) - INTERVAL '1 day';
+
+
+    -- --- ЛОГИРОВАНИЕ: НАЧАЛО ---
+    log_message := 'Расчет формы 101 за период с ' || report_start_date::TEXT || ' по ' || report_end_date::TEXT;
+    INSERT INTO "LOGS"."ETL_LOGS" (process_name, start_time, status, message)
+    VALUES ('fill_f101_round_f', NOW(), 'STARTED', log_message);
 
     -- Удаляем старые данные за этот же период, чтобы избежать дублей при перезапуске
     DELETE FROM "DM"."DM_F101_ROUND_F" WHERE from_date = report_start_date;
@@ -101,6 +109,12 @@ BEGIN
     LEFT JOIN turnovers t ON ai.ledger_account = t.ledger_account
     LEFT JOIN closing_balances cb ON ai.ledger_account = cb.ledger_account
     GROUP BY ai.ledger_account, ob.balance_in_rub, ob.balance_in_val, t.turn_deb_rub, t.turn_deb_val, t.turn_cre_rub, t.turn_cre_val, cb.balance_out_rub, cb.balance_out_val;
+
+    -- --- ЛОГИРОВАНИЕ: ЗАВЕРШЕНИЕ ---
+    GET DIAGNOSTICS rows_inserted = ROW_COUNT;
+    UPDATE "LOGS"."ETL_LOGS"
+    SET end_time = NOW(), status = 'SUCCESS', rows_processed = rows_inserted, message = 'Расчет формы 101 успешно завершен'
+    WHERE log_id = (SELECT MAX(log_id) FROM "LOGS"."ETL_LOGS" WHERE process_name = 'fill_f101_round_f' AND status = 'STARTED');
 
 END;
 $$;
