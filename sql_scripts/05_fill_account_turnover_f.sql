@@ -1,7 +1,16 @@
 -- ФИНАЛЬНАЯ РАБОЧАЯ ВЕРСИЯ
 CREATE OR REPLACE PROCEDURE "DS".fill_account_turnover_f(i_OnDate DATE)
 LANGUAGE plpgsql AS $$
+DECLARE
+    log_message TEXT;
+    rows_inserted INT;
 BEGIN
+    
+        -- --- ЛОГИРОВАНИЕ: НАЧАЛО ---
+    log_message := 'Расчет оборотов за ' || i_OnDate::TEXT;
+    INSERT INTO "LOGS"."ETL_LOGS" (process_name, start_time, status, message)
+    VALUES ('fill_account_turnover_f', NOW(), 'STARTED', log_message);
+
     -- Удаляем данные только за тот день, который будем считать
     DELETE FROM "DM"."DM_ACCOUNT_TURNOVER_F" WHERE on_date = i_OnDate;
 
@@ -50,5 +59,12 @@ BEGIN
     -- Группируем по дате и счету для финального суммирования
     GROUP BY
         i_OnDate, t.account_rk;
+
+    -- --- ЛОГИРОВАНИЕ: ЗАВЕРШЕНИЕ ---
+    GET DIAGNOSTICS rows_inserted = ROW_COUNT;
+    UPDATE "LOGS"."ETL_LOGS"
+    SET end_time = NOW(), status = 'SUCCESS', rows_processed = rows_inserted, message = 'Расчет оборотов успешно завершен'
+    WHERE log_id = (SELECT MAX(log_id) FROM "LOGS"."ETL_LOGS" WHERE process_name = 'fill_account_turnover_f' AND status = 'STARTED');
+
 END;
 $$;
