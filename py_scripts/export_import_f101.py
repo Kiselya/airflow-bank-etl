@@ -10,15 +10,10 @@ from sqlalchemy import create_engine, text
 import logging
 import os
 from datetime import datetime
+from dotenv import load_dotenv, find_dotenv
+import os
 
-# Настройки подключения к БД (из контейнера)
-DB_CONFIG = {
-    'host': 'postgres',      # В Docker сети имя сервиса
-    'port': '5432',          # Внутренний порт PostgreSQL
-    'database': 'bank_etl',  # ИСПРАВЛЕНО: используем базу bank_etl
-    'user': 'ds_user',
-    'password': '0510'
-}
+load_dotenv(find_dotenv())
 
 # Настройки файлов
 OUTPUT_DIR = '/opt/airflow/f101_export'

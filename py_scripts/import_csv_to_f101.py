@@ -9,13 +9,8 @@ import psycopg2
 from sqlalchemy import create_engine, text
 import logging
 import os
-
-# Настройки из переменных окружения или значения по умолчанию
-DB_HOST = os.getenv('PG_HOST', 'postgres')  # В Docker сети
-DB_PORT = os.getenv('PG_PORT', '5432')      # Внутренний порт
-DB_NAME = os.getenv('PG_DATABASE', 'bank_etl')  # ИСПРАВЛЕНО: база bank_etl
-DB_USER = os.getenv('PG_USER', 'ds_user')
-DB_PASSWORD = os.getenv('PG_PASSWORD', '0510')
+from dotenv import load_dotenv, find_dotenv
+import os
 
 # Путь к CSV файлу
 CSV_FILE_PATH = '/opt/airflow/f101_report.csv'

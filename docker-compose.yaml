@@ -93,6 +93,8 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
+    env_file:
+        - .env
     ports: 
       - "5433:5432" # или 5432:5432, если порт свободен  
     volumes:
